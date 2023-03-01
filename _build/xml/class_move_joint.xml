@@ -1,0 +1,349 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="class_move_joint" kind="class" language="C++" prot="public">
+    <compoundname>MoveJoint</compoundname>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_move_joint_1a2589720522a325ca7f8ef10cb5241823" prot="private" static="no" mutable="no">
+        <type>ros::NodeHandle</type>
+        <definition>ros::NodeHandle MoveJoint::nh_</definition>
+        <argsstring></argsstring>
+        <name>nh_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="14" column="21" bodyfile="src/camera_movement.cpp" bodystart="14" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_move_joint_1a74b5109d461217779f4140837d0331ba" prot="private" static="no" mutable="no">
+        <type>ros::Publisher</type>
+        <definition>ros::Publisher MoveJoint::move_cam_pub</definition>
+        <argsstring></argsstring>
+        <name>move_cam_pub</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="16" column="20" bodyfile="src/camera_movement.cpp" bodystart="16" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_move_joint_1a2aa7e631d1243736a67f8c81b48007ce" prot="private" static="no" mutable="no">
+        <type>ros::Publisher</type>
+        <definition>ros::Publisher MoveJoint::move_base_pub</definition>
+        <argsstring></argsstring>
+        <name>move_base_pub</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="17" column="20" bodyfile="src/camera_movement.cpp" bodystart="17" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_move_joint_1ab5c5cbe90c939f1309675d109e8b344c" prot="private" static="no" mutable="no">
+        <type>ros::ServiceServer</type>
+        <definition>ros::ServiceServer MoveJoint::motion_srv</definition>
+        <argsstring></argsstring>
+        <name>motion_srv</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="18" column="24" bodyfile="src/camera_movement.cpp" bodystart="18" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_move_joint_1ae8f9209cd2919e3042f61585c8bfaaa6" prot="private" static="no" mutable="no">
+        <type>std_msgs::Float64</type>
+        <definition>std_msgs::Float64 MoveJoint::joint1_pos</definition>
+        <argsstring></argsstring>
+        <name>joint1_pos</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="20" column="23" bodyfile="src/camera_movement.cpp" bodystart="20" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_move_joint_1a5ac667228084d9154dd4129adf59d478" prot="private" static="no" mutable="no">
+        <type>std_msgs::Float64</type>
+        <definition>std_msgs::Float64 MoveJoint::joint2_pos</definition>
+        <argsstring></argsstring>
+        <name>joint2_pos</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="21" column="23" bodyfile="src/camera_movement.cpp" bodystart="21" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_move_joint_1a52e1c4b5fa6d95acc6765c658ce0320e" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool MoveJoint::move_arm</definition>
+        <argsstring></argsstring>
+        <name>move_arm</name>
+        <initializer>= true</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="22" column="10" bodyfile="src/camera_movement.cpp" bodystart="22" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_move_joint_1a37642c820ce02ff67330cd0836b3d062" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool MoveJoint::cam_up</definition>
+        <argsstring></argsstring>
+        <name>cam_up</name>
+        <initializer>= true</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="23" column="10" bodyfile="src/camera_movement.cpp" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_move_joint_1aecd6435bd183955147b0ba5e502ceb19" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double MoveJoint::current_base_pos</definition>
+        <argsstring></argsstring>
+        <name>current_base_pos</name>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="24" column="12" bodyfile="src/camera_movement.cpp" bodystart="24" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_move_joint_1aeb71267e5b958054012e9a7cf38378f9" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double MoveJoint::current_cam_pos</definition>
+        <argsstring></argsstring>
+        <name>current_cam_pos</name>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="25" column="12" bodyfile="src/camera_movement.cpp" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_move_joint_1a29e66b15fe4f6c5847f186ec51fe6bb2" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double MoveJoint::full_base_cycle</definition>
+        <argsstring></argsstring>
+        <name>full_base_cycle</name>
+        <initializer>= 6.2</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="26" column="12" bodyfile="src/camera_movement.cpp" bodystart="26" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_move_joint_1a34d938987eba574086bbd98c4efc67c5" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double MoveJoint::cam_lim</definition>
+        <argsstring></argsstring>
+        <name>cam_lim</name>
+        <initializer>= 0.2</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="27" column="12" bodyfile="src/camera_movement.cpp" bodystart="27" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_move_joint_1a77e86c3bcdd5fb2cf2d69d1a3555e9ef" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>MoveJoint::MoveJoint</definition>
+        <argsstring>()</argsstring>
+        <name>MoveJoint</name>
+        <briefdescription>
+<para>Construct of the <ref refid="class_move_joint" kindref="compound">MoveJoint</ref> class. After the initialization of publishers and services is done, the arm is moved until all markers have been detected. After that, the node is shut down. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="36" column="5" bodyfile="src/camera_movement.cpp" bodystart="36" bodyend="57"/>
+      </memberdef>
+      <memberdef kind="function" id="class_move_joint_1a1629d8af76bdff2229144e5cfaa130eb" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void MoveJoint::rotate_camera_joint</definition>
+        <argsstring>(ros::Publisher move_cam_pub)</argsstring>
+        <name>rotate_camera_joint</name>
+        <param>
+          <type>ros::Publisher</type>
+          <declname>move_cam_pub</declname>
+        </param>
+        <briefdescription>
+<para>Function done to move the camera joint. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>move_cam_pub</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>publisher for the camera joint command</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+This method allow the camera joint to tilt of about 20 degrees both upwards or downwards depending on the value of the cam_up variable. If it is true, the camera tilts upwards, else it tilts downwards. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="68" column="10" bodyfile="src/camera_movement.cpp" bodystart="68" bodyend="98"/>
+      </memberdef>
+      <memberdef kind="function" id="class_move_joint_1a24b019b3e58fe9f816f01f3ab43bb8dc" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void MoveJoint::rotate_base_joint</definition>
+        <argsstring>(ros::Publisher move_base_pub)</argsstring>
+        <name>rotate_base_joint</name>
+        <param>
+          <type>ros::Publisher</type>
+          <declname>move_base_pub</declname>
+        </param>
+        <briefdescription>
+<para>Function done to move the base joint. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>move_cam_pub</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>publisher for the base joint command</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+This method allow the base joint to rotate about itself of 360 degrees. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="107" column="10" bodyfile="src/camera_movement.cpp" bodystart="107" bodyend="123"/>
+      </memberdef>
+      <memberdef kind="function" id="class_move_joint_1aca298b3abacba252ce50c1029d065703" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void MoveJoint::move_to_surv_pos</definition>
+        <argsstring>(ros::Publisher move_base_pub, ros::Publisher move_cam_pub)</argsstring>
+        <name>move_to_surv_pos</name>
+        <param>
+          <type>ros::Publisher</type>
+          <declname>move_base_pub</declname>
+        </param>
+        <param>
+          <type>ros::Publisher</type>
+          <declname>move_cam_pub</declname>
+        </param>
+        <briefdescription>
+<para>Function done to move the arm to its home position. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>move_base_pub</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>publisher for the base joint command </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>move_cam_pub</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>publisher for the camera joint command</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+Method called once all markers have been detected. This is done to allow the arm return in its home position. It is done in two steps: 1) Make the base joint rotate until it reaches its home position 2) Make the camera joint rotate until it reaches its home position </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="136" column="10" bodyfile="src/camera_movement.cpp" bodystart="136" bodyend="168"/>
+      </memberdef>
+      <memberdef kind="function" id="class_move_joint_1ac817ac382e3515f873a26484b83fa249" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool MoveJoint::motionCallback</definition>
+        <argsstring>(assignment2::ArmInfo::Request &amp;req, assignment2::ArmInfo::Response &amp;res)</argsstring>
+        <name>motionCallback</name>
+        <param>
+          <type>assignment2::ArmInfo::Request &amp;</type>
+          <declname>req</declname>
+        </param>
+        <param>
+          <type>assignment2::ArmInfo::Response &amp;</type>
+          <declname>res</declname>
+        </param>
+        <briefdescription>
+<para>Function called when the client node makes a request. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>req</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>int to state if all markes have been detected. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>res</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>int to state that the server executed correctly. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>true</para>
+</simplesect>
+Method called from the client once all markers have been detected. It makes the arm go back to its home position and then the motion of the arm is ended. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/camera_movement.cpp" line="180" column="10" bodyfile="src/camera_movement.cpp" bodystart="180" bodyend="191"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Class done to make the arm of the robot move to detect all markers. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/camera_movement.cpp" line="11" column="16" bodyfile="src/camera_movement.cpp" bodystart="11" bodyend="192"/>
+    <listofallmembers>
+      <member refid="class_move_joint_1a34d938987eba574086bbd98c4efc67c5" prot="private" virt="non-virtual"><scope>MoveJoint</scope><name>cam_lim</name></member>
+      <member refid="class_move_joint_1a37642c820ce02ff67330cd0836b3d062" prot="private" virt="non-virtual"><scope>MoveJoint</scope><name>cam_up</name></member>
+      <member refid="class_move_joint_1aecd6435bd183955147b0ba5e502ceb19" prot="private" virt="non-virtual"><scope>MoveJoint</scope><name>current_base_pos</name></member>
+      <member refid="class_move_joint_1aeb71267e5b958054012e9a7cf38378f9" prot="private" virt="non-virtual"><scope>MoveJoint</scope><name>current_cam_pos</name></member>
+      <member refid="class_move_joint_1a29e66b15fe4f6c5847f186ec51fe6bb2" prot="private" virt="non-virtual"><scope>MoveJoint</scope><name>full_base_cycle</name></member>
+      <member refid="class_move_joint_1ae8f9209cd2919e3042f61585c8bfaaa6" prot="private" virt="non-virtual"><scope>MoveJoint</scope><name>joint1_pos</name></member>
+      <member refid="class_move_joint_1a5ac667228084d9154dd4129adf59d478" prot="private" virt="non-virtual"><scope>MoveJoint</scope><name>joint2_pos</name></member>
+      <member refid="class_move_joint_1ab5c5cbe90c939f1309675d109e8b344c" prot="private" virt="non-virtual"><scope>MoveJoint</scope><name>motion_srv</name></member>
+      <member refid="class_move_joint_1ac817ac382e3515f873a26484b83fa249" prot="public" virt="non-virtual"><scope>MoveJoint</scope><name>motionCallback</name></member>
+      <member refid="class_move_joint_1a52e1c4b5fa6d95acc6765c658ce0320e" prot="private" virt="non-virtual"><scope>MoveJoint</scope><name>move_arm</name></member>
+      <member refid="class_move_joint_1a2aa7e631d1243736a67f8c81b48007ce" prot="private" virt="non-virtual"><scope>MoveJoint</scope><name>move_base_pub</name></member>
+      <member refid="class_move_joint_1a74b5109d461217779f4140837d0331ba" prot="private" virt="non-virtual"><scope>MoveJoint</scope><name>move_cam_pub</name></member>
+      <member refid="class_move_joint_1aca298b3abacba252ce50c1029d065703" prot="public" virt="non-virtual"><scope>MoveJoint</scope><name>move_to_surv_pos</name></member>
+      <member refid="class_move_joint_1a77e86c3bcdd5fb2cf2d69d1a3555e9ef" prot="public" virt="non-virtual"><scope>MoveJoint</scope><name>MoveJoint</name></member>
+      <member refid="class_move_joint_1a2589720522a325ca7f8ef10cb5241823" prot="private" virt="non-virtual"><scope>MoveJoint</scope><name>nh_</name></member>
+      <member refid="class_move_joint_1a24b019b3e58fe9f816f01f3ab43bb8dc" prot="public" virt="non-virtual"><scope>MoveJoint</scope><name>rotate_base_joint</name></member>
+      <member refid="class_move_joint_1a1629d8af76bdff2229144e5cfaa130eb" prot="public" virt="non-virtual"><scope>MoveJoint</scope><name>rotate_camera_joint</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

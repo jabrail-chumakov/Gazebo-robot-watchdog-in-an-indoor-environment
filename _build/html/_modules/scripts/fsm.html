@@ -1,0 +1,518 @@
+
+<!DOCTYPE html>
+
+<html lang="EN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>scripts.fsm &#8212; assignment2 1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for scripts.fsm</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. module:: fsm</span>
+<span class="sd">	:platform: Unix</span>
+<span class="sd">	:synopsis: Python module for the management of the battery status</span>
+<span class="sd">   </span>
+<span class="sd">.. moduleauthor:: Jabrail Chumakov &lt;jabrail.chumakov@nu.edu.kz&gt;</span>
+
+
+<span class="sd">This is a description of a ROS node developed for the second assignment of the Experimental Robotics course</span>
+<span class="sd">in the Robotics Engineering Master program. The software architecture is designed to create a Final State Machine</span>
+<span class="sd">that controls the behavior of a surveillance robot deployed in an indoor environment. The robot&#39;s objective</span>
+<span class="sd">is to visit different locations such as rooms and corridors and spend some time in each. The robot starts at</span>
+<span class="sd">the charging location and waits until it receives instructions to build the topological map. It then moves to</span>
+<span class="sd">new locations, performs surveillance tasks, and checks other locations. This behavior continues until the</span>
+<span class="sd">program is shut down. When the robot&#39;s battery is low, it returns to the charging location and waits</span>
+<span class="sd">before resuming the same behavior. The robot prioritizes staying in corridors and visits a room that</span>
+<span class="sd">has not been visited for a while.The node includes defined subscriptions, publishers, services, and</span>
+<span class="sd">service actions used in the final_state_machine.py helper node.</span>
+<span class="sd">		</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Import necessary modules and libraries</span>
+<span class="kn">import</span> <span class="nn">rospy</span>
+<span class="kn">import</span> <span class="nn">smach</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">roslib</span>
+<span class="kn">import</span> <span class="nn">smach_ros</span>
+<span class="kn">from</span> <span class="nn">std_msgs.msg</span> <span class="kn">import</span> <span class="n">String</span><span class="p">,</span> <span class="n">Float64</span><span class="p">,</span> <span class="n">Bool</span><span class="p">,</span> <span class="n">Float32</span>
+<span class="kn">from</span> <span class="nn">assignment2.fsm_helper</span> <span class="kn">import</span> <span class="n">Helper</span>
+
+<span class="c1"># Import colorama to make colorful text printed on to console</span>
+<span class="kn">from</span> <span class="nn">colorama</span> <span class="kn">import</span> <span class="n">Fore</span><span class="p">,</span> <span class="n">Back</span><span class="p">,</span> <span class="n">Style</span>
+
+<span class="c1"># Import constant name defined to structure the architecture</span>
+<span class="kn">from</span> <span class="nn">assignment2</span> <span class="kn">import</span> <span class="n">architecture_name_mapper</span> <span class="k">as</span> <span class="n">anm</span>
+
+<span class="c1"># The list of names that identify the states of the Finite State Machine.</span>
+<span class="n">STATE_CHARGE</span> <span class="o">=</span> <span class="s1">&#39;CHARGE&#39;</span>                <span class="c1"># State where the robot recharges its battery.</span>
+<span class="n">STATE_BUILD_WORLD</span> <span class="o">=</span> <span class="s1">&#39;BUILDWORLD&#39;</span>       <span class="c1"># State where the environment is build using informations from the aruco.</span>
+<span class="n">STATE_REASONER</span> <span class="o">=</span> <span class="s1">&#39;REASONER&#39;</span>            <span class="c1"># State that decides the next location that will be visisted.</span>
+<span class="n">STATE_MOTION</span> <span class="o">=</span> <span class="s1">&#39;MOTION&#39;</span>                <span class="c1"># State that allows the robot to move in the environement.</span>
+<span class="n">STATE_REACH_CHARGE</span> <span class="o">=</span> <span class="s1">&#39;REACHCHARGE&#39;</span>     <span class="c1"># State used to let the robot reach the charging station.</span>
+<span class="n">STATE_SURVEILLANCE</span> <span class="o">=</span> <span class="s1">&#39;SURVEILLANCE&#39;</span>    <span class="c1"># State that checks the location in which the root stops.</span>
+
+
+<span class="c1"># The list of names that identify the transitions of the Finite State Machine.</span>
+<span class="n">TRANS_BATTERY_LOW</span> <span class="o">=</span> <span class="s1">&#39;battery_low&#39;</span>      <span class="c1"># The transition from the `REASONER`, &#39;MOTION&#39; and `SURVEILLANCE` states toward the `REACHCHARGE` state.</span>
+<span class="n">TRANS_BATTERY_OK</span> <span class="o">=</span> <span class="s1">&#39;battery_ok&#39;</span>        <span class="c1"># The transition from the `CHARGE` state to the `REASONER` state.</span>
+<span class="n">TRANS_CHECK_LOC</span> <span class="o">=</span> <span class="s1">&#39;check_loc&#39;</span>          <span class="c1"># The transition from the `MOTION` state to the `SURVEILLANCE` state.</span>
+<span class="n">TRANS_INFO_DONE</span> <span class="o">=</span> <span class="s1">&#39;info_done&#39;</span>          <span class="c1"># The transition from the `REASONER` state to the `MOTION` state.</span>
+<span class="n">TRANS_WORLD_DONE</span> <span class="o">=</span> <span class="s1">&#39;world_done&#39;</span>        <span class="c1"># The transition from the `BUILDWORLD` state with to the &#39;REASONER&#39; state.</span>
+<span class="n">TRANS_CHARGE_ON</span> <span class="o">=</span> <span class="s1">&#39;charge_on&#39;</span>          <span class="c1"># The transition from the &#39;REACHCHARGE&#39; state toward the `CAHRGE` state.</span>
+<span class="n">TRANS_CHECK_DONE</span> <span class="o">=</span> <span class="s1">&#39;check_done&#39;</span>        <span class="c1"># The transition from the &#39;SURVEILLANCE&#39; state toward the `REASONER` state.</span>
+
+
+<span class="c1"># Initialize and define the tag for identifying logs producer.</span>
+<span class="n">LOG_TAG</span> <span class="o">=</span> <span class="n">anm</span><span class="o">.</span><span class="n">NODE_STATE_MACHINE</span>										  
+
+<div class="viewcode-block" id="BuildWorld"><a class="viewcode-back" href="../../index.html#scripts.fsm.BuildWorld">[docs]</a><span class="k">class</span> <span class="nc">BuildWorld</span><span class="p">(</span><span class="n">smach</span><span class="o">.</span><span class="n">State</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">	Class defining BUILDWORLD.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">helper</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">		This is a method that sets the state to BUILDWORLD.</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">			self: current class instance.</span>
+<span class="sd">			helper: this refers to an allocated instance of the Helper() class located in the state_machine_helper.py file.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">smach</span><span class="o">.</span><span class="n">State</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcomes</span> <span class="o">=</span> <span class="p">[</span><span class="n">TRANS_BATTERY_LOW</span><span class="p">,</span> <span class="n">TRANS_BATTERY_OK</span><span class="p">,</span> <span class="n">TRANS_CHECK_LOC</span><span class="p">,</span> <span class="n">TRANS_INFO_DONE</span><span class="p">,</span> <span class="n">TRANS_WORLD_DONE</span><span class="p">,</span> <span class="n">TRANS_CHARGE_ON</span><span class="p">,</span> <span class="n">TRANS_CHECK_DONE</span><span class="p">])</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span> <span class="o">=</span> <span class="n">helper</span>
+								 
+<div class="viewcode-block" id="BuildWorld.execute"><a class="viewcode-back" href="../../index.html#scripts.fsm.BuildWorld.execute">[docs]</a>	<span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userdata</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">		This is a method that runs before leaving the BUILDWORLD state. Its purpose is to create the environment by</span>
+<span class="sd">		retrieving information from aruco markers. The method loops until all 7 markers have been detected.</span>
+<span class="sd">		Once detected, the build_environment() method is called to add information to the existing ontology using</span>
+<span class="sd">		the Armor server. When the environment is created, the program transitions to the next state.</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">			self: current class instance.</span>
+<span class="sd">			userdata: userdata between the states of the finite state machine.</span>
+<span class="sd">		Returns:</span>
+<span class="sd">			TRANS_WORLD_DONE: transition from the BUILDWORLD to the REASONER state.</span>
+<span class="sd">		</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">log_msg</span> <span class="o">=</span> <span class="n">Fore</span><span class="o">.</span><span class="n">GREEN</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">The state of &quot;BUILD WORLD&quot; is being executed.</span><span class="se">\n</span><span class="s1">&#39;</span>
+		<span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">log_msg</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span> 
+		<span class="c1"># Reset console color to default</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[39m&#39;</span><span class="p">)</span> 
+		<span class="n">r</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Rate</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+		<span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">aruco_done</span><span class="p">():</span>
+			<span class="c1"># Wait until all arucos have been detected before building the world</span>
+			<span class="n">r</span><span class="o">.</span><span class="n">sleep</span><span class="p">()</span>
+		<span class="c1"># Build the world once the markers have been detected</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">build_environment</span><span class="p">()</span>     
+		<span class="k">while</span> <span class="ow">not</span> <span class="n">rospy</span><span class="o">.</span><span class="n">is_shutdown</span><span class="p">():</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">world_done</span><span class="p">():</span>
+					<span class="k">return</span> <span class="n">TRANS_WORLD_DONE</span>
+			<span class="k">finally</span><span class="p">:</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div></div>
+					
+
+					
+<div class="viewcode-block" id="Charge"><a class="viewcode-back" href="../../index.html#scripts.fsm.Charge">[docs]</a><span class="k">class</span> <span class="nc">Charge</span><span class="p">(</span><span class="n">smach</span><span class="o">.</span><span class="n">State</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">	Class defining CHARGE.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">helper</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">		This is a method that sets the state to CHARGE.</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">			self: current class instance.</span>
+<span class="sd">			helper: this refers to an allocated instance of the Helper() class located in the state_machine_helper.py file.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">smach</span><span class="o">.</span><span class="n">State</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcomes</span> <span class="o">=</span> <span class="p">[</span><span class="n">TRANS_BATTERY_LOW</span><span class="p">,</span> <span class="n">TRANS_BATTERY_OK</span><span class="p">,</span> <span class="n">TRANS_CHECK_LOC</span><span class="p">,</span> <span class="n">TRANS_INFO_DONE</span><span class="p">,</span> <span class="n">TRANS_WORLD_DONE</span><span class="p">,</span> <span class="n">TRANS_CHARGE_ON</span><span class="p">,</span> <span class="n">TRANS_CHECK_DONE</span><span class="p">])</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span> <span class="o">=</span> <span class="n">helper</span>
+
+<div class="viewcode-block" id="Charge.execute"><a class="viewcode-back" href="../../index.html#scripts.fsm.Charge.execute">[docs]</a>	<span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userdata</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">		This is a method that runs before leaving the CHARGE state. Its purpose is to recharge the robot by calling</span>
+<span class="sd">		the recharge_srv() method defined in the helper node. The method continues to recharge the battery until it</span>
+<span class="sd">		is fully charged, at which point the program transitions to the next state.</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">			self: current class instance.</span>
+<span class="sd">			userdata: userdata between the states of the finite state machine.</span>
+<span class="sd">		Returns:</span>
+<span class="sd">			TRANS_BATTERY_OK: transition from the CHARGE to the REASONER state.</span>
+<span class="sd">		</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">log_msg</span> <span class="o">=</span> <span class="n">Fore</span><span class="o">.</span><span class="n">GREEN</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">The state of &quot;CHARGE&quot; is being executed.</span><span class="se">\n</span><span class="s1">&#39;</span>
+		<span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">log_msg</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span>
+		<span class="c1"># Reset console color to default</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[39m&#39;</span><span class="p">)</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">recharge_srv</span><span class="p">()</span>
+		<span class="k">while</span> <span class="ow">not</span> <span class="n">rospy</span><span class="o">.</span><span class="n">is_shutdown</span><span class="p">():</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">ret_battery_low</span><span class="p">():</span>
+					<span class="k">return</span> <span class="n">TRANS_BATTERY_OK</span>
+			<span class="k">finally</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>			</div></div>
+
+			
+
+<div class="viewcode-block" id="ReachCharge"><a class="viewcode-back" href="../../index.html#scripts.fsm.ReachCharge">[docs]</a><span class="k">class</span> <span class="nc">ReachCharge</span><span class="p">(</span><span class="n">smach</span><span class="o">.</span><span class="n">State</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">	Class defining REACH_CHARGE.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">helper</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">		This is a method that sets the state to REACH_CHARGE.</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">			self: current class instance.</span>
+<span class="sd">			helper: this refers to an allocated instance of the Helper() class located in the state_machine_helper.py file.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">smach</span><span class="o">.</span><span class="n">State</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcomes</span> <span class="o">=</span> <span class="p">[</span><span class="n">TRANS_BATTERY_LOW</span><span class="p">,</span> <span class="n">TRANS_BATTERY_OK</span><span class="p">,</span> <span class="n">TRANS_CHECK_LOC</span><span class="p">,</span> <span class="n">TRANS_INFO_DONE</span><span class="p">,</span> <span class="n">TRANS_WORLD_DONE</span><span class="p">,</span> <span class="n">TRANS_CHARGE_ON</span><span class="p">,</span> <span class="n">TRANS_CHECK_DONE</span><span class="p">])</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span> <span class="o">=</span> <span class="n">helper</span>
+			
+<div class="viewcode-block" id="ReachCharge.execute"><a class="viewcode-back" href="../../index.html#scripts.fsm.ReachCharge.execute">[docs]</a>	<span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userdata</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">		This is a method that runs before leaving the REACH_CHARGE state. Its purpose is to guide the robot to the charging</span>
+<span class="sd">		location &#39;E&#39; by calling the go_to_charge() method defined in the helper node. The method continues to guide the robot</span>
+<span class="sd">		until it reaches the charging location, at which point the program transitions to the next state.</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">			self: current class instance.</span>
+<span class="sd">			userdata: userdata between the states of the finite state machine.</span>
+<span class="sd">		Returns:</span>
+<span class="sd">			TRANS_CHARGE_ON: transition from the REACHCHARGE to the CHARGE state.</span>
+<span class="sd">		</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">log_msg</span> <span class="o">=</span> <span class="n">Fore</span><span class="o">.</span><span class="n">GREEN</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">The state of &quot;REACH CHARGE&quot; is being executed.</span><span class="se">\n</span><span class="s1">&#39;</span>
+		<span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">log_msg</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span>
+		<span class="c1"># Reset console color to default</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[39m&#39;</span><span class="p">)</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">go_to_charge</span><span class="p">()</span>
+		<span class="k">while</span> <span class="ow">not</span> <span class="n">rospy</span><span class="o">.</span><span class="n">is_shutdown</span><span class="p">():</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">charge_ready</span><span class="p">():</span>
+					<span class="k">return</span> <span class="n">TRANS_CHARGE_ON</span>
+			<span class="k">finally</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div></div>
+		
+
+
+<div class="viewcode-block" id="Reasoner"><a class="viewcode-back" href="../../index.html#scripts.fsm.Reasoner">[docs]</a><span class="k">class</span> <span class="nc">Reasoner</span><span class="p">(</span><span class="n">smach</span><span class="o">.</span><span class="n">State</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">	Class defining REASONER.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">helper</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">		This is a method that sets the state to REASONER.</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">			self: current class instance.</span>
+<span class="sd">			helper: this refers to an allocated instance of the Helper() class located in the state_machine_helper.py file.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">smach</span><span class="o">.</span><span class="n">State</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcomes</span> <span class="o">=</span> <span class="p">[</span><span class="n">TRANS_BATTERY_LOW</span><span class="p">,</span> <span class="n">TRANS_BATTERY_OK</span><span class="p">,</span> <span class="n">TRANS_CHECK_LOC</span><span class="p">,</span> <span class="n">TRANS_INFO_DONE</span><span class="p">,</span> <span class="n">TRANS_WORLD_DONE</span><span class="p">,</span> <span class="n">TRANS_CHARGE_ON</span><span class="p">,</span> <span class="n">TRANS_CHECK_DONE</span><span class="p">])</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span> <span class="o">=</span> <span class="n">helper</span>
+			
+<div class="viewcode-block" id="Reasoner.execute"><a class="viewcode-back" href="../../index.html#scripts.fsm.Reasoner.execute">[docs]</a>	<span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userdata</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">		This is a method that runs before leaving the REASONER state. Its purpose is to enable the robot to reason and</span>
+<span class="sd">		achieve the desired behavior for the surveillance robot by calling the reason() method defined in the helper node.</span>
+<span class="sd">		After querying the ontology, the battery level is checked. If the battery level is low during execution, the next</span>
+<span class="sd">		state to be executed will be REACHCHARGE. Otherwise, the MOTION state will be executed.</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">			self: current class instance.</span>
+<span class="sd">			userdata: userdata between the states of the finite state machine.</span>
+<span class="sd">		Returns:</span>
+<span class="sd">			TRANS_BATTERY_LOW: transition from the REASONER to the REACHCHARGE state.</span>
+<span class="sd">			TRANS_INFO_DONE: transition from the REASONER to the MOTION state.</span>
+<span class="sd">		go </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">log_msg</span> <span class="o">=</span> <span class="n">Fore</span><span class="o">.</span><span class="n">GREEN</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">The state of &quot;REASONER&quot; is being executed.</span><span class="se">\n</span><span class="s1">&#39;</span>
+		<span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">log_msg</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span>
+		<span class="c1"># Reset console color to default</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[39m&#39;</span><span class="p">)</span> 
+		<span class="n">goal_location</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">reason</span><span class="p">()</span>
+		<span class="n">log_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;NEXT GOAL: </span><span class="si">{</span><span class="n">goal_location</span><span class="si">}</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+		<span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">log_msg</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span>
+		<span class="k">while</span> <span class="ow">not</span> <span class="n">rospy</span><span class="o">.</span><span class="n">is_shutdown</span><span class="p">():</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">ret_battery_low</span><span class="p">():</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">cancel_motion</span><span class="p">()</span>
+					<span class="k">return</span> <span class="n">TRANS_BATTERY_LOW</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">reason_done</span><span class="p">():</span>
+					<span class="k">return</span> <span class="n">TRANS_INFO_DONE</span>
+			<span class="k">finally</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>        		</div></div>
+
+
+
+<div class="viewcode-block" id="Motion"><a class="viewcode-back" href="../../index.html#scripts.fsm.Motion">[docs]</a><span class="k">class</span> <span class="nc">Motion</span><span class="p">(</span><span class="n">smach</span><span class="o">.</span><span class="n">State</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">	Class defining MOTION.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">helper</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">		This is a method that sets the state to MOTION.</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">			self: current class instance.</span>
+<span class="sd">			helper: this refers to an allocated instance of the Helper() class located in the state_machine_helper.py file.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">smach</span><span class="o">.</span><span class="n">State</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcomes</span> <span class="o">=</span> <span class="p">[</span><span class="n">TRANS_BATTERY_LOW</span><span class="p">,</span> <span class="n">TRANS_BATTERY_OK</span><span class="p">,</span> <span class="n">TRANS_CHECK_LOC</span><span class="p">,</span> <span class="n">TRANS_INFO_DONE</span><span class="p">,</span> <span class="n">TRANS_WORLD_DONE</span><span class="p">,</span> <span class="n">TRANS_CHARGE_ON</span><span class="p">,</span> <span class="n">TRANS_CHECK_DONE</span><span class="p">])</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span> <span class="o">=</span> <span class="n">helper</span> 
+			
+<div class="viewcode-block" id="Motion.execute"><a class="viewcode-back" href="../../index.html#scripts.fsm.Motion.execute">[docs]</a>	<span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userdata</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">		This is a function that runs before leaving the MOTION state. Its purpose is to enable the robot to create a path</span>
+<span class="sd">		from its current position to the desired position retrieved from the REASONER. It also ensures that the robot follows</span>
+<span class="sd">		the programmed path throughout the entire motion. The robot travels autonomously from its current position to the target</span>
+<span class="sd">		using a SLAM algorithm to locate itself in the environment and map the surroundings. The action is completed when the</span>
+<span class="sd">		robot reaches the target. If the battery level is low during execution, the next state to be executed will be REACHCHARGE.</span>
+<span class="sd">		Otherwise, the SURVEILLANCE state will be executed.</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">			self: current class instance.</span>
+<span class="sd">			userdata: userdata between the states of the finite state machine.</span>
+<span class="sd">		Returns:</span>
+<span class="sd">			TRANS_BATTERY_LOW: transition from the MOTION to the REACHCHARGE state.</span>
+<span class="sd">			TRANS_CHECK_LOC: transition from the MOTION to the SURVEILLANCE state.</span>
+<span class="sd">		</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">log_msg</span> <span class="o">=</span> <span class="n">Fore</span><span class="o">.</span><span class="n">GREEN</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">The state of &quot;MOTION&quot; is being executed.</span><span class="se">\n</span><span class="s1">&#39;</span>
+		<span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">log_msg</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span>
+		<span class="c1"># Reset console color to default</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[39m&#39;</span><span class="p">)</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">go_to_goal</span><span class="p">()</span>
+		<span class="k">while</span> <span class="ow">not</span> <span class="n">rospy</span><span class="o">.</span><span class="n">is_shutdown</span><span class="p">():</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">check_motion</span><span class="p">()</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">ret_battery_low</span><span class="p">():</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">cancel_motion</span><span class="p">()</span>
+					<span class="k">return</span> <span class="n">TRANS_BATTERY_LOW</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">motion_done</span><span class="p">():</span>
+					<span class="k">return</span> <span class="n">TRANS_CHECK_LOC</span>
+			<span class="k">finally</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div></div>
+
+
+
+<div class="viewcode-block" id="Surveillance"><a class="viewcode-back" href="../../index.html#scripts.fsm.Surveillance">[docs]</a><span class="k">class</span> <span class="nc">Surveillance</span><span class="p">(</span><span class="n">smach</span><span class="o">.</span><span class="n">State</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">	Class defining SURVEILLANCE.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">helper</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">		This is a method that sets the state to SURVEILLANCE.</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">			self: current class instance.</span>
+<span class="sd">			helper: this refers to an allocated instance of the Helper() class located in the state_machine_helper.py file.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">smach</span><span class="o">.</span><span class="n">State</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcomes</span> <span class="o">=</span> <span class="p">[</span><span class="n">TRANS_BATTERY_LOW</span><span class="p">,</span> <span class="n">TRANS_BATTERY_OK</span><span class="p">,</span> <span class="n">TRANS_CHECK_LOC</span><span class="p">,</span> <span class="n">TRANS_INFO_DONE</span><span class="p">,</span> <span class="n">TRANS_WORLD_DONE</span><span class="p">,</span> <span class="n">TRANS_CHARGE_ON</span><span class="p">,</span> <span class="n">TRANS_CHECK_DONE</span><span class="p">])</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span> <span class="o">=</span> <span class="n">helper</span> 
+		
+<div class="viewcode-block" id="Surveillance.execute"><a class="viewcode-back" href="../../index.html#scripts.fsm.Surveillance.execute">[docs]</a>	<span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userdata</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">		This is a method that runs before leaving the SURVEILLANCE state. Its purpose is to simulate a surveillance task</span>
+<span class="sd">		when the robot reaches a specific location. The method rotates the base joint of the robot&#39;s arm 360 degrees while</span>
+<span class="sd">		the camera at the top of the arm captures images. During execution, the battery level is checked. If the battery</span>
+<span class="sd">		level is low, the next state to be executed will be REACHCHARGE. Otherwise, the REASONER state will be executed.</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">			self: current class instance.</span>
+<span class="sd">			userdata: userdata between the states of the finite state machine.</span>
+<span class="sd">		Returns:</span>
+<span class="sd">			TRANS_BATTERY_LOW: transition from the SURVEILLANCE to the REACHCHARGE state.</span>
+<span class="sd">			TRANS_CHECK_DONE: transition from the SURVEILLANCE to the REASONER state.</span>
+<span class="sd">		</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">log_msg</span> <span class="o">=</span> <span class="n">Fore</span><span class="o">.</span><span class="n">GREEN</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">The state of &quot;SURVEILLANCE&quot; is being executed.</span><span class="se">\n</span><span class="s1">&#39;</span>
+		<span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">log_msg</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span>
+		<span class="c1"># Reset console color to default</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[39m&#39;</span><span class="p">)</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">do_surveillance</span><span class="p">()</span>
+		<span class="k">while</span> <span class="ow">not</span> <span class="n">rospy</span><span class="o">.</span><span class="n">is_shutdown</span><span class="p">():</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">ret_battery_low</span><span class="p">():</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">cancel_motion</span><span class="p">()</span>
+					<span class="k">return</span> <span class="n">TRANS_BATTERY_LOW</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">surveillance_done</span><span class="p">():</span>
+					<span class="k">return</span> <span class="n">TRANS_CHECK_DONE</span>
+			<span class="k">finally</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_helper</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div></div>
+
+
+			
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../index.html#scripts.fsm.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This method initializes the Final State Machine of the node state_machine.py using the SMACH modules.</span>
+<span class="sd">	The SMACH modules provide a framework for creating hierarchical state machines in ROS. The state_machine.py</span>
+<span class="sd">	node depends on the state_machine_helper.py node, which contains a Helper() instance that is passed to every state of the FSM. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+	<span class="n">rospy</span><span class="o">.</span><span class="n">init_node</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">NODE_STATE_MACHINE</span><span class="p">,</span> <span class="n">log_level</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+	
+	<span class="n">helper</span> <span class="o">=</span> <span class="n">Helper</span><span class="p">()</span>
+	
+	<span class="c1"># Create a SMACH state machine</span>
+	<span class="n">sm</span> <span class="o">=</span> <span class="n">smach</span><span class="o">.</span><span class="n">StateMachine</span><span class="p">(</span><span class="n">outcomes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;container_interface_surv&#39;</span><span class="p">])</span>
+	<span class="n">sm</span><span class="o">.</span><span class="n">userdata</span><span class="o">.</span><span class="n">sm_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+	<span class="c1"># Open the container</span>
+	<span class="k">with</span> <span class="n">sm</span><span class="p">:</span>
+		<span class="c1"># Add states to the container</span>
+		<span class="n">smach</span><span class="o">.</span><span class="n">StateMachine</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">STATE_BUILD_WORLD</span><span class="p">,</span> <span class="n">BuildWorld</span><span class="p">(</span><span class="n">helper</span><span class="p">),</span>
+							<span class="n">transitions</span><span class="o">=</span><span class="p">{</span><span class="n">TRANS_BATTERY_LOW</span><span class="p">:</span><span class="n">STATE_BUILD_WORLD</span><span class="p">,</span>
+								     <span class="n">TRANS_CHARGE_ON</span><span class="p">:</span><span class="n">STATE_BUILD_WORLD</span><span class="p">,</span> 
+								     <span class="n">TRANS_BATTERY_OK</span><span class="p">:</span><span class="n">STATE_BUILD_WORLD</span><span class="p">,</span>
+								     <span class="n">TRANS_CHECK_LOC</span><span class="p">:</span><span class="n">STATE_BUILD_WORLD</span><span class="p">,</span>
+								     <span class="n">TRANS_INFO_DONE</span><span class="p">:</span><span class="n">STATE_BUILD_WORLD</span><span class="p">,</span>
+								     <span class="n">TRANS_WORLD_DONE</span><span class="p">:</span><span class="n">STATE_REASONER</span><span class="p">,</span>
+								     <span class="n">TRANS_CHECK_DONE</span><span class="p">:</span><span class="n">STATE_BUILD_WORLD</span><span class="p">})</span>
+																										
+		<span class="n">smach</span><span class="o">.</span><span class="n">StateMachine</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">STATE_CHARGE</span><span class="p">,</span> <span class="n">Charge</span><span class="p">(</span><span class="n">helper</span><span class="p">),</span> 
+							<span class="n">transitions</span><span class="o">=</span><span class="p">{</span><span class="n">TRANS_BATTERY_LOW</span><span class="p">:</span><span class="n">STATE_CHARGE</span><span class="p">,</span>
+								     <span class="n">TRANS_CHARGE_ON</span><span class="p">:</span><span class="n">STATE_CHARGE</span><span class="p">,</span>
+								     <span class="n">TRANS_BATTERY_OK</span><span class="p">:</span><span class="n">STATE_REASONER</span><span class="p">,</span>
+								     <span class="n">TRANS_CHECK_LOC</span><span class="p">:</span><span class="n">STATE_CHARGE</span><span class="p">,</span>
+							             <span class="n">TRANS_INFO_DONE</span><span class="p">:</span><span class="n">STATE_CHARGE</span><span class="p">,</span>
+								     <span class="n">TRANS_WORLD_DONE</span><span class="p">:</span><span class="n">STATE_CHARGE</span><span class="p">,</span>
+								     <span class="n">TRANS_CHECK_DONE</span><span class="p">:</span><span class="n">STATE_CHARGE</span><span class="p">})</span>
+													
+		<span class="n">smach</span><span class="o">.</span><span class="n">StateMachine</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">STATE_REASONER</span><span class="p">,</span> <span class="n">Reasoner</span><span class="p">(</span><span class="n">helper</span><span class="p">),</span> 
+							<span class="n">transitions</span><span class="o">=</span><span class="p">{</span><span class="n">TRANS_BATTERY_LOW</span><span class="p">:</span><span class="n">STATE_REACH_CHARGE</span><span class="p">,</span>
+								     <span class="n">TRANS_CHARGE_ON</span><span class="p">:</span><span class="n">STATE_REASONER</span><span class="p">,</span> 
+								     <span class="n">TRANS_BATTERY_OK</span><span class="p">:</span><span class="n">STATE_REASONER</span><span class="p">,</span>
+								     <span class="n">TRANS_CHECK_LOC</span><span class="p">:</span><span class="n">STATE_REASONER</span><span class="p">,</span>
+								     <span class="n">TRANS_INFO_DONE</span><span class="p">:</span><span class="n">STATE_MOTION</span><span class="p">,</span>
+								     <span class="n">TRANS_WORLD_DONE</span><span class="p">:</span><span class="n">STATE_REASONER</span><span class="p">,</span>
+								     <span class="n">TRANS_CHECK_DONE</span><span class="p">:</span><span class="n">STATE_REASONER</span><span class="p">})</span>
+													
+		<span class="n">smach</span><span class="o">.</span><span class="n">StateMachine</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">STATE_MOTION</span><span class="p">,</span> <span class="n">Motion</span><span class="p">(</span><span class="n">helper</span><span class="p">),</span> 
+							<span class="n">transitions</span><span class="o">=</span><span class="p">{</span><span class="n">TRANS_BATTERY_LOW</span><span class="p">:</span><span class="n">STATE_REACH_CHARGE</span><span class="p">,</span> 
+								     <span class="n">TRANS_CHARGE_ON</span><span class="p">:</span><span class="n">STATE_MOTION</span><span class="p">,</span>
+							             <span class="n">TRANS_BATTERY_OK</span><span class="p">:</span><span class="n">STATE_MOTION</span><span class="p">,</span>
+								     <span class="n">TRANS_CHECK_LOC</span><span class="p">:</span><span class="n">STATE_SURVEILLANCE</span><span class="p">,</span>
+								     <span class="n">TRANS_INFO_DONE</span><span class="p">:</span><span class="n">STATE_MOTION</span><span class="p">,</span>
+								     <span class="n">TRANS_WORLD_DONE</span><span class="p">:</span><span class="n">STATE_MOTION</span><span class="p">,</span>
+								     <span class="n">TRANS_CHECK_DONE</span><span class="p">:</span><span class="n">STATE_MOTION</span><span class="p">})</span>
+													
+		<span class="n">smach</span><span class="o">.</span><span class="n">StateMachine</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">STATE_REACH_CHARGE</span><span class="p">,</span> <span class="n">ReachCharge</span><span class="p">(</span><span class="n">helper</span><span class="p">),</span> 
+							<span class="n">transitions</span><span class="o">=</span><span class="p">{</span><span class="n">TRANS_BATTERY_LOW</span><span class="p">:</span><span class="n">STATE_REACH_CHARGE</span><span class="p">,</span> 
+								     <span class="n">TRANS_CHARGE_ON</span><span class="p">:</span><span class="n">STATE_CHARGE</span><span class="p">,</span>
+								     <span class="n">TRANS_BATTERY_OK</span><span class="p">:</span><span class="n">STATE_REACH_CHARGE</span><span class="p">,</span>
+								     <span class="n">TRANS_CHECK_LOC</span><span class="p">:</span><span class="n">STATE_REACH_CHARGE</span><span class="p">,</span>
+								     <span class="n">TRANS_INFO_DONE</span><span class="p">:</span><span class="n">STATE_REACH_CHARGE</span><span class="p">,</span>
+								     <span class="n">TRANS_WORLD_DONE</span><span class="p">:</span><span class="n">STATE_REACH_CHARGE</span><span class="p">,</span>
+								     <span class="n">TRANS_CHECK_DONE</span><span class="p">:</span><span class="n">STATE_REACH_CHARGE</span><span class="p">})</span>
+										
+		<span class="n">smach</span><span class="o">.</span><span class="n">StateMachine</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">STATE_SURVEILLANCE</span><span class="p">,</span> <span class="n">Surveillance</span><span class="p">(</span><span class="n">helper</span><span class="p">),</span> 
+							<span class="n">transitions</span><span class="o">=</span><span class="p">{</span><span class="n">TRANS_BATTERY_LOW</span><span class="p">:</span><span class="n">STATE_REACH_CHARGE</span><span class="p">,</span> 
+								     <span class="n">TRANS_CHARGE_ON</span><span class="p">:</span><span class="n">STATE_SURVEILLANCE</span><span class="p">,</span>
+								     <span class="n">TRANS_BATTERY_OK</span><span class="p">:</span><span class="n">STATE_SURVEILLANCE</span><span class="p">,</span>
+								     <span class="n">TRANS_CHECK_LOC</span><span class="p">:</span><span class="n">STATE_SURVEILLANCE</span><span class="p">,</span>
+								     <span class="n">TRANS_INFO_DONE</span><span class="p">:</span><span class="n">STATE_SURVEILLANCE</span><span class="p">,</span>
+								     <span class="n">TRANS_WORLD_DONE</span><span class="p">:</span><span class="n">STATE_SURVEILLANCE</span><span class="p">,</span>
+								     <span class="n">TRANS_CHECK_DONE</span><span class="p">:</span><span class="n">STATE_REASONER</span><span class="p">})</span>
+										  
+	<span class="c1"># Create and start the introspection server for visualization</span>
+	<span class="n">sis</span> <span class="o">=</span> <span class="n">smach_ros</span><span class="o">.</span><span class="n">IntrospectionServer</span><span class="p">(</span><span class="s1">&#39;server_surv&#39;</span><span class="p">,</span> <span class="n">sm</span><span class="p">,</span> <span class="s1">&#39;/SM_ROOT_SURV&#39;</span><span class="p">)</span>
+	<span class="n">sis</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+	<span class="c1"># Execute the state machine</span>
+	<span class="n">outcome</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+
+	<span class="c1"># Wait for ctrl-c to stop the application</span>
+	<span class="n">rospy</span><span class="o">.</span><span class="n">spin</span><span class="p">()</span>
+	<span class="n">sis</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+	<span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">assignment2</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Jabrail Chumakov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.8.17">
+  <compound refid="class_aruco_detector" kind="class"><name>ArucoDetector</name>
+    <member refid="class_aruco_detector_1a6f1a173985290ca88a343cfb723c75c0" kind="variable"><name>nh_</name></member>
+    <member refid="class_aruco_detector_1aab80dace94b91352758b4d57fd8cb4a0" kind="variable"><name>detector_</name></member>
+    <member refid="class_aruco_detector_1ac6fdc6f3f862a324c46eeef3b89b64a4" kind="variable"><name>dictionary_</name></member>
+    <member refid="class_aruco_detector_1a18609787e697b9142efb427f3cdea1f0" kind="variable"><name>detectedMarkers</name></member>
+    <member refid="class_aruco_detector_1a5b91d3a20f133cca78300facb28158c2" kind="variable"><name>markerIDs</name></member>
+    <member refid="class_aruco_detector_1a40f0fe8a0da2db9cc0eb8351965c696f" kind="variable"><name>CamParam</name></member>
+    <member refid="class_aruco_detector_1adfd2e0b851812019f883b113af5bddc6" kind="variable"><name>MARKER_SIZE</name></member>
+    <member refid="class_aruco_detector_1aed7835b87079e90aacdeee54e98f14c3" kind="variable"><name>MARKER_NUM</name></member>
+    <member refid="class_aruco_detector_1a7f4424d680940cd899ba754e28698a8d" kind="variable"><name>marker_cli_</name></member>
+    <member refid="class_aruco_detector_1a356b842aeb4a55bf6ce7738f107e7678" kind="variable"><name>room_srv_</name></member>
+    <member refid="class_aruco_detector_1a68d6bd819fca0ae21ff94ffa70b1c3c9" kind="variable"><name>camera_cli_</name></member>
+    <member refid="class_aruco_detector_1acc5e7b1fda6cb89ac6e0ac14dd1f09f5" kind="variable"><name>arm_srv_</name></member>
+    <member refid="class_aruco_detector_1a804c16e1676b5f1ca67a9b7c7797a468" kind="variable"><name>world_cli_</name></member>
+    <member refid="class_aruco_detector_1ad7a48dfc631d8fe1e165ab3d05f64cd7" kind="variable"><name>world_srv_</name></member>
+    <member refid="class_aruco_detector_1a650051eb0ec8f16e4a1ff26a5dafd95e" kind="variable"><name>conn</name></member>
+    <member refid="class_aruco_detector_1aa7b3f7619cd0510399e8a302e43d4af1" kind="variable"><name>it_</name></member>
+    <member refid="class_aruco_detector_1a98a21bc2d5d7653373b00d18e939fbc8" kind="variable"><name>img_sub_</name></member>
+    <member refid="class_aruco_detector_1a256906324252513a9754a23a3c68af56" kind="variable"><name>image_</name></member>
+    <member refid="class_aruco_detector_1a7ca313b73d4ef6d209290f1629a437df" kind="function"><name>ArucoDetector</name></member>
+    <member refid="class_aruco_detector_1ad379822cd9e0412f7c8014a792fbafee" kind="function"><name>imageCallback</name></member>
+  </compound>
+  <compound refid="class_move_joint" kind="class"><name>MoveJoint</name>
+    <member refid="class_move_joint_1a2589720522a325ca7f8ef10cb5241823" kind="variable"><name>nh_</name></member>
+    <member refid="class_move_joint_1a74b5109d461217779f4140837d0331ba" kind="variable"><name>move_cam_pub</name></member>
+    <member refid="class_move_joint_1a2aa7e631d1243736a67f8c81b48007ce" kind="variable"><name>move_base_pub</name></member>
+    <member refid="class_move_joint_1ab5c5cbe90c939f1309675d109e8b344c" kind="variable"><name>motion_srv</name></member>
+    <member refid="class_move_joint_1ae8f9209cd2919e3042f61585c8bfaaa6" kind="variable"><name>joint1_pos</name></member>
+    <member refid="class_move_joint_1a5ac667228084d9154dd4129adf59d478" kind="variable"><name>joint2_pos</name></member>
+    <member refid="class_move_joint_1a52e1c4b5fa6d95acc6765c658ce0320e" kind="variable"><name>move_arm</name></member>
+    <member refid="class_move_joint_1a37642c820ce02ff67330cd0836b3d062" kind="variable"><name>cam_up</name></member>
+    <member refid="class_move_joint_1aecd6435bd183955147b0ba5e502ceb19" kind="variable"><name>current_base_pos</name></member>
+    <member refid="class_move_joint_1aeb71267e5b958054012e9a7cf38378f9" kind="variable"><name>current_cam_pos</name></member>
+    <member refid="class_move_joint_1a29e66b15fe4f6c5847f186ec51fe6bb2" kind="variable"><name>full_base_cycle</name></member>
+    <member refid="class_move_joint_1a34d938987eba574086bbd98c4efc67c5" kind="variable"><name>cam_lim</name></member>
+    <member refid="class_move_joint_1a77e86c3bcdd5fb2cf2d69d1a3555e9ef" kind="function"><name>MoveJoint</name></member>
+    <member refid="class_move_joint_1a1629d8af76bdff2229144e5cfaa130eb" kind="function"><name>rotate_camera_joint</name></member>
+    <member refid="class_move_joint_1a24b019b3e58fe9f816f01f3ab43bb8dc" kind="function"><name>rotate_base_joint</name></member>
+    <member refid="class_move_joint_1aca298b3abacba252ce50c1029d065703" kind="function"><name>move_to_surv_pos</name></member>
+    <member refid="class_move_joint_1ac817ac382e3515f873a26484b83fa249" kind="function"><name>motionCallback</name></member>
+  </compound>
+  <compound refid="aruco__detection_8cpp" kind="file"><name>aruco_detection.cpp</name>
+    <member refid="aruco__detection_8cpp_1a3c04138a5bfe5d72780bb7e82a18e627" kind="function"><name>main</name></member>
+  </compound>
+  <compound refid="camera__movement_8cpp" kind="file"><name>camera_movement.cpp</name>
+    <member refid="camera__movement_8cpp_1a3c04138a5bfe5d72780bb7e82a18e627" kind="function"><name>main</name></member>
+  </compound>
+  <compound refid="marker__server_8cpp" kind="file"><name>marker_server.cpp</name>
+    <member refid="marker__server_8cpp_1acb386145eddd7e35588ea2b3a5ec6ca5" kind="function"><name>markerCallback</name></member>
+    <member refid="marker__server_8cpp_1a3c04138a5bfe5d72780bb7e82a18e627" kind="function"><name>main</name></member>
+  </compound>
+  <compound refid="dir_68267d1309a1af8e8297ef4c3efbcdba" kind="dir"><name>src</name>
+  </compound>
+</doxygenindex>

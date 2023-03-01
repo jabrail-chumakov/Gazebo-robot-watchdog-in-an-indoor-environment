@@ -1,0 +1,977 @@
+
+<!DOCTYPE html>
+
+<html lang="EN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to assignment2’s documentation! &#8212; assignment2 1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-assignment2-s-documentation">
+<h1>Welcome to assignment2’s documentation!<a class="headerlink" href="#welcome-to-assignment2-s-documentation" title="Permalink to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="module-scripts.fsm">
+<span id="state-machine-module"></span><h1>State Machine Module<a class="headerlink" href="#module-scripts.fsm" title="Permalink to this heading">¶</a></h1>
+<span class="target" id="module-fsm"></span><p>This is a description of a ROS node developed for the second assignment of the Experimental Robotics course
+in the Robotics Engineering Master program. The software architecture is designed to create a Final State Machine
+that controls the behavior of a surveillance robot deployed in an indoor environment. The robot’s objective
+is to visit different locations such as rooms and corridors and spend some time in each. The robot starts at
+the charging location and waits until it receives instructions to build the topological map. It then moves to
+new locations, performs surveillance tasks, and checks other locations. This behavior continues until the
+program is shut down. When the robot’s battery is low, it returns to the charging location and waits
+before resuming the same behavior. The robot prioritizes staying in corridors and visits a room that
+has not been visited for a while.The node includes defined subscriptions, publishers, services, and
+service actions used in the final_state_machine.py helper node.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.fsm.BuildWorld">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.fsm.</span></span><span class="sig-name descname"><span class="pre">BuildWorld</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">helper</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/fsm.html#BuildWorld"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.fsm.BuildWorld" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class defining BUILDWORLD.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.fsm.BuildWorld.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/fsm.html#BuildWorld.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.fsm.BuildWorld.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a method that runs before leaving the BUILDWORLD state. Its purpose is to create the environment by
+retrieving information from aruco markers. The method loops until all 7 markers have been detected.
+Once detected, the build_environment() method is called to add information to the existing ontology using
+the Armor server. When the environment is created, the program transitions to the next state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – current class instance.</p></li>
+<li><p><strong>userdata</strong> – userdata between the states of the finite state machine.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>transition from the BUILDWORLD to the REASONER state.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>TRANS_WORLD_DONE</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.fsm.Charge">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.fsm.</span></span><span class="sig-name descname"><span class="pre">Charge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">helper</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/fsm.html#Charge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.fsm.Charge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class defining CHARGE.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.fsm.Charge.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/fsm.html#Charge.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.fsm.Charge.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a method that runs before leaving the CHARGE state. Its purpose is to recharge the robot by calling
+the recharge_srv() method defined in the helper node. The method continues to recharge the battery until it
+is fully charged, at which point the program transitions to the next state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – current class instance.</p></li>
+<li><p><strong>userdata</strong> – userdata between the states of the finite state machine.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>transition from the CHARGE to the REASONER state.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>TRANS_BATTERY_OK</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.fsm.Motion">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.fsm.</span></span><span class="sig-name descname"><span class="pre">Motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">helper</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/fsm.html#Motion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.fsm.Motion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class defining MOTION.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.fsm.Motion.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/fsm.html#Motion.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.fsm.Motion.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a function that runs before leaving the MOTION state. Its purpose is to enable the robot to create a path
+from its current position to the desired position retrieved from the REASONER. It also ensures that the robot follows
+the programmed path throughout the entire motion. The robot travels autonomously from its current position to the target
+using a SLAM algorithm to locate itself in the environment and map the surroundings. The action is completed when the
+robot reaches the target. If the battery level is low during execution, the next state to be executed will be REACHCHARGE.
+Otherwise, the SURVEILLANCE state will be executed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – current class instance.</p></li>
+<li><p><strong>userdata</strong> – userdata between the states of the finite state machine.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>transition from the MOTION to the REACHCHARGE state.
+TRANS_CHECK_LOC: transition from the MOTION to the SURVEILLANCE state.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>TRANS_BATTERY_LOW</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.fsm.ReachCharge">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.fsm.</span></span><span class="sig-name descname"><span class="pre">ReachCharge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">helper</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/fsm.html#ReachCharge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.fsm.ReachCharge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class defining REACH_CHARGE.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.fsm.ReachCharge.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/fsm.html#ReachCharge.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.fsm.ReachCharge.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a method that runs before leaving the REACH_CHARGE state. Its purpose is to guide the robot to the charging
+location ‘E’ by calling the go_to_charge() method defined in the helper node. The method continues to guide the robot
+until it reaches the charging location, at which point the program transitions to the next state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – current class instance.</p></li>
+<li><p><strong>userdata</strong> – userdata between the states of the finite state machine.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>transition from the REACHCHARGE to the CHARGE state.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>TRANS_CHARGE_ON</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.fsm.Reasoner">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.fsm.</span></span><span class="sig-name descname"><span class="pre">Reasoner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">helper</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/fsm.html#Reasoner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.fsm.Reasoner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class defining REASONER.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.fsm.Reasoner.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/fsm.html#Reasoner.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.fsm.Reasoner.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a method that runs before leaving the REASONER state. Its purpose is to enable the robot to reason and
+achieve the desired behavior for the surveillance robot by calling the reason() method defined in the helper node.
+After querying the ontology, the battery level is checked. If the battery level is low during execution, the next
+state to be executed will be REACHCHARGE. Otherwise, the MOTION state will be executed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – current class instance.</p></li>
+<li><p><strong>userdata</strong> – userdata between the states of the finite state machine.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>transition from the REASONER to the REACHCHARGE state.
+TRANS_INFO_DONE: transition from the REASONER to the MOTION state.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>TRANS_BATTERY_LOW</p>
+</dd>
+</dl>
+<p>go</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.fsm.Surveillance">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.fsm.</span></span><span class="sig-name descname"><span class="pre">Surveillance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">helper</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/fsm.html#Surveillance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.fsm.Surveillance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class defining SURVEILLANCE.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.fsm.Surveillance.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/fsm.html#Surveillance.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.fsm.Surveillance.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a method that runs before leaving the SURVEILLANCE state. Its purpose is to simulate a surveillance task
+when the robot reaches a specific location. The method rotates the base joint of the robot’s arm 360 degrees while
+the camera at the top of the arm captures images. During execution, the battery level is checked. If the battery
+level is low, the next state to be executed will be REACHCHARGE. Otherwise, the REASONER state will be executed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – current class instance.</p></li>
+<li><p><strong>userdata</strong> – userdata between the states of the finite state machine.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>transition from the SURVEILLANCE to the REACHCHARGE state.
+TRANS_CHECK_DONE: transition from the SURVEILLANCE to the REASONER state.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>TRANS_BATTERY_LOW</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scripts.fsm.main">
+<span class="sig-prename descclassname"><span class="pre">scripts.fsm.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/fsm.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.fsm.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method initializes the Final State Machine of the node state_machine.py using the SMACH modules.
+The SMACH modules provide a framework for creating hierarchical state machines in ROS. The state_machine.py
+node depends on the state_machine_helper.py node, which contains a Helper() instance that is passed to every state of the FSM.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-scripts.battery_status">
+<span id="robot-battery-state-module"></span><h1>Robot Battery State Module<a class="headerlink" href="#module-scripts.battery_status" title="Permalink to this heading">¶</a></h1>
+<span class="target" id="module-battery_status"></span><p>The task for the second assignment in the Experimental Robotics course
+of the Robotics Engineering Master program is to create a ROS node for
+controlling the battery level of a robot.
+The software architecture should allow for the publishing of the battery
+state on the topic “/state/battery_low”. The battery level can transition
+from high to low in two ways: either by setting the battery_low flag to
+“True” after a random delay defined in the architecture, or manually by
+retrieving the input from the user. When the battery level becomes low,
+the transition is published. Additionally, the node should implement a
+service that charges the robot when the battery level becomes low.
+This service is blocking, and after the battery is charged, the client receives a response.</p>
+<dl class="simple">
+<dt>Publishes to:</dt><dd><p>/state/battery_low battery level</p>
+</dd>
+<dt>Service:</dt><dd><p>/state/recharge recharge robot</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.battery_status.RobotBatteryState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.battery_status.</span></span><span class="sig-name descname"><span class="pre">RobotBatteryState</span></span><a class="reference internal" href="_modules/scripts/battery_status.html#RobotBatteryState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.battery_status.RobotBatteryState" title="Permalink to this definition">¶</a></dt>
+<dd><p>The purpose of this class is to manage the state of the robot’s battery, which involves changing
+the battery state to low and recharging the battery when the robot reaches the charging location ‘E’.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.battery_status.RobotBatteryState.battery_charger">
+<span class="sig-name descname"><span class="pre">battery_charger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/battery_status.html#RobotBatteryState.battery_charger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.battery_status.RobotBatteryState.battery_charger" title="Permalink to this definition">¶</a></dt>
+<dd><p>This service is used to charge the robot’s battery. When the client requests the service,
+the server simulates the charging process by waiting for a duration of time between
+self._random_battery_charge[0] and self._random_battery_charge[1]. Once this time has passed,
+the server changes the battery state to high and sends a response to the client.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – current class instance.</p></li>
+<li><p><strong>request</strong> – boolean to indicate charging beginning.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>boolean to indicate charging end.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.battery_status.RobotBatteryState.is_battery_low">
+<span class="sig-name descname"><span class="pre">is_battery_low</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/battery_status.html#RobotBatteryState.is_battery_low"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.battery_status.RobotBatteryState.is_battery_low" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method runs on a separate thread and publishes any changes in the battery status.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – current class instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.battery_status.RobotBatteryState.print_info">
+<span class="sig-name descname"><span class="pre">print_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/battery_status.html#RobotBatteryState.print_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.battery_status.RobotBatteryState.print_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>The method prints log information only when random testing is in progress, so that users
+can easily use the keyboard interface without being distracted by excessive information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – current class instance.</p></li>
+<li><p><strong>msg</strong> – message for the logger</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.battery_status.RobotBatteryState.random_battery_notifier">
+<span class="sig-name descname"><span class="pre">random_battery_notifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">publisher</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/battery_status.html#RobotBatteryState.random_battery_notifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.battery_status.RobotBatteryState.random_battery_notifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method publishes a message indicating that the battery level has become low.
+The delay before publishing is randomized within the range of [self._random_battery_time[0],
+self._random_battery_time[1]]. The message is sent through the ‘publisher’ input parameter
+as a boolean value, where ‘True’ indicates that the battery is low.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – current class instance.</p></li>
+<li><p><strong>publisher</strong> – boolean to indicate charge level.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-utilities.assignment2.fsm_helper">
+<span id="state-machine-helper-module"></span><h1>State Machine Helper Module<a class="headerlink" href="#module-utilities.assignment2.fsm_helper" title="Permalink to this heading">¶</a></h1>
+<span class="target" id="module-fsm_helper"></span><p>This is a ROS node for the second assignment of the Robotics Engineering Master program’s Experimental Robotics course.
+Its software architecture enables the initialization of a helper class for the Final State Machine that governs the
+behavior of a surveillance robot. The node provides a way to keep the code in the state_machine.py node more organized
+and easy to understand by defining each task in this node.</p>
+<dl class="simple">
+<dt>Publishes to:</dt><dd><p>/cmd_vel control robot’s velocities
+/robot/joint1_position_controller/command rotate arm’s base joint</p>
+</dd>
+<dt>Subscribes to:</dt><dd><p>/state/battery_low subscribes to battery state</p>
+</dd>
+<dt>Service:</dt><dd><p>/state/recharge robot charging
+/armor_interface_srv for ontology communication
+/world_init obtain world information from aruco markers</p>
+</dd>
+<dt>Action Service:</dt><dd><p>/move_base move robot between rooms</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">utilities.assignment2.fsm_helper.</span></span><span class="sig-name descname"><span class="pre">Helper</span></span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class has been designed to separate the implementation of the Finite State Machine from the rest of the code in
+the state_machine.py node. By managing synchronization with subscribers, services, and action servers, it helps to
+ensure that the code is more readable and easier to understand.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.aruco_done">
+<span class="sig-name descname"><span class="pre">aruco_done</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.aruco_done"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.aruco_done" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the value of the variable that indicates whether all the markers have been detected, and whether
+the information gathered from them can be used to update the ontology. The function will return “True” if
+all the arucos have been detected, and “False” otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – current class instance.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a boolean value that indicates the current status of aruco detection.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>self.aruco_detected</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.battery_callback">
+<span class="sig-name descname"><span class="pre">battery_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.battery_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.battery_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is responsible for handling the subscription to the topic /state/battery_low in order to get updates on the battery status.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – current class instance.</p></li>
+<li><p><strong>msg</strong> – refers to the object that is set up to receive and process messages published to the topic /state/battery_low,</p></li>
+<li><p><strong>battery.</strong> (<em>in order to monitor the state</em><em> of </em><em>the robot's</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.build_environment">
+<span class="sig-name descname"><span class="pre">build_environment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.build_environment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.build_environment" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method initializes the environment ontology by using the ARMOR service. Once all the markers have been detected,
+this method is called to upload all the new information about each room to the ontology. By utilizing the ARMOR service,
+it is possible to initialize and define all the necessary components to ensure the correct operation of the program.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – current class instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.cancel_motion">
+<span class="sig-name descname"><span class="pre">cancel_motion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.cancel_motion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.cancel_motion" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function stops any current goals that have been sent to the MoveBase action service.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – current class instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.charge_ready">
+<span class="sig-name descname"><span class="pre">charge_ready</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.charge_ready"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.charge_ready" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the value of the variable indicating if the robot has reached the charging location
+and is ready to be charged. The returned value will be “True” if the charging location is reached,
+and “False” otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – current class instance.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a boolean variable that indicates whether the robot has reached the charging location.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>self.charge_reached</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.check_motion">
+<span class="sig-name descname"><span class="pre">check_motion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.check_motion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.check_motion" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method verifies if the robot has successfully reached its goal by checking if the state of the
+MoveBase action service is equal to “DONE”. Once the robot has reached its goal, the ontology is updated.
+This involves placing the robot in its new location in the ontology, as well as updating the timestamps
+of the robot and goal location to ensure proper behavior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – current class instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.explore_init_room">
+<span class="sig-name descname"><span class="pre">explore_init_room</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.explore_init_room"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.explore_init_room" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method enables the robot to rotate in place once the ontology has been completely uploaded.
+This rotation takes place within the initial room before the robot starts processing and reasoning
+about the environment. The purpose of this rotation is to help the robot gain a better understanding
+of its surroundings and to allow time for the map to be uploaded in Rviz, thus preventing collisions
+with walls or other obstacles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – current class instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.go_to_charge">
+<span class="sig-name descname"><span class="pre">go_to_charge</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.go_to_charge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.go_to_charge" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function enables the robot to navigate towards the charging station when its battery level is low.
+It sets the charging station as the robot’s target location and calls the self.go_to_goal method to reach it.
+The variable charge_reached is set to True once the robot successfully reaches room ‘E’, indicating that it
+is ready to be charged.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – current class instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.go_to_goal">
+<span class="sig-name descname"><span class="pre">go_to_goal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.go_to_goal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.go_to_goal" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function sets a goal in space based on the decision made by the Reasoner. The coordinates of the goal are
+retrieved and passed to the MoveBase action service, which uses a SLAM algorithm to find a path between the
+robot and the goal, taking into account the environment and obstacles. The robot follows this path and can
+adjust it in real-time if new obstacles are detected by sensors. MoveBase also ensures that the robot stays on the desired path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – current class instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.handle_world_init">
+<span class="sig-name descname"><span class="pre">handle_world_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.handle_world_init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.handle_world_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>This service retrieves information about the map from aruco markers detected by the system.
+The collected information is then used to construct an ontology of the environment, enabling
+the robot to navigate and behave appropriately within the indoor setting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – current class instance.</p></li>
+<li><p><strong>request</strong> – string and floating-point values are used to indicate the name of the room, its</p></li>
+<li><p><strong>coordinates</strong> (<em>spatial</em>) – </p></li>
+<li><p><strong>them.</strong> (<em>and its connections to other rooms through the doors that connect</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a boolean value is used to indicate whether the information has been successfully retrieved or not.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.motion_done">
+<span class="sig-name descname"><span class="pre">motion_done</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.motion_done"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.motion_done" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the value of the variable that indicates whether the robot has reached its destination or not.
+The output value will be “True” if the robot has successfully reached the goal, and “False” if it hasn’t reached it yet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – current class instance.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>refers to a boolean variable that indicates the status of the robot’s movement.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>self.motion_completed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.reason">
+<span class="sig-name descname"><span class="pre">reason</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.reason"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.reason" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method communicates with the pre-existing ontology to gather information and determine the
+robot’s next move based on the desired surveillance behavior. Firstly, reachable rooms and their
+status (e.g., ROOM, URGENT, CORRIDOR) are retrieved. Then, each reachable room is checked, and
+the robot will move first to URGENT locations. If no URGENT locations are present, it will stay on CORRIDORS.
+If there are no CORRIDORS, the robot will move to a random ROOM. Finally, the method returns the next
+location that the robot will visit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – current class instance.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>refers to the next location that the reasoner has determined the robot should reach.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>self._next_goal</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.reason_done">
+<span class="sig-name descname"><span class="pre">reason_done</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.reason_done"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.reason_done" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function retrieves the value of the variable that indicates whether the reasoning phase,
+which involves retrieving information from the ontology using the ARMOR service, has been completed.
+The function will return a boolean value of “True” if the reasoning phase is complete, and “False” otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – current class instance.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a boolean value that indicates the current status of the reasoner.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>self.reasoner_done</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.recharge_srv">
+<span class="sig-name descname"><span class="pre">recharge_srv</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.recharge_srv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.recharge_srv" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a service used to recharge the robot’s battery. When the battery is low and the robot
+is at the charging location, a request is sent to the service to start charging the battery.
+After a specified time, the service returns a result indicating that the battery is fully charged.
+Once the service has finished, the variable battery_low is set to “False” to indicate that the robot’s
+battery is now high. The service is blocking, meaning that the program execution is paused until
+the service returns a result.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – current class instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.reset_var">
+<span class="sig-name descname"><span class="pre">reset_var</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.reset_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.reset_var" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function resets all the variables used to determine when a task has completed its execution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – current class instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.ret_battery_low">
+<span class="sig-name descname"><span class="pre">ret_battery_low</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.ret_battery_low"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.ret_battery_low" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function retrieves the value of a variable that indicates whether the robot’s battery level is low or not.
+The returned value will be “True” if the battery level is low, and “False” otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – current class instance.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a boolean value indicating the current status of the battery.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>self.battery_low</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.surveillance_done">
+<span class="sig-name descname"><span class="pre">surveillance_done</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.surveillance_done"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.surveillance_done" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function indicates that surveillance is done.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>refers to a boolean variable that indicates the surveillance is completed.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>self.check_completed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.Helper.world_done">
+<span class="sig-name descname"><span class="pre">world_done</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#Helper.world_done"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.Helper.world_done" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the value of the variable that indicates whether the environment has been created
+using the ARMOR service to define the ontology. The function will return “True” if the map
+has been successfully created, and “False” otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> – current class instance.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a boolean value that indicates the current status of the map generation.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>self.map_completed</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.ontology_format">
+<span class="sig-prename descclassname"><span class="pre">utilities.assignment2.fsm_helper.</span></span><span class="sig-name descname"><span class="pre">ontology_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#ontology_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.ontology_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function accepts a list as input and generates a new list that is based on the original one.
+The new list contains all elements of the original list starting from the specified ‘start’ index
+and ending at the specified ‘end’ index. The resulting list only includes characters and numbers
+within the range of the specified indexes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>old_list</strong> – refers to the list that requires formatting.</p></li>
+<li><p><strong>start</strong> – refers to the index of the element in the original list that will be the first to be copied to the new list.</p></li>
+<li><p><strong>end</strong> – refers to the index of the element in the original list that will be the last to be copied to the new list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>refers to the list that has been properly formatted according to the specified requirements.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>new_list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utilities.assignment2.fsm_helper.ontology_manager">
+<span class="sig-prename descclassname"><span class="pre">utilities.assignment2.fsm_helper.</span></span><span class="sig-name descname"><span class="pre">ontology_manager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_command_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_command_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ARGS</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utilities/assignment2/fsm_helper.html#ontology_manager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utilities.assignment2.fsm_helper.ontology_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function serves the purpose of communicating with the ARMOR service in order to obtain
+and update information about the environment in the ontology. It is used as a replacement for the ARMOR API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> – command to execute (e.g. ADD, LOAD, …).</p></li>
+<li><p><strong>primary_command_spec</strong> – primary command specification (optional).</p></li>
+<li><p><strong>secondary_command_spec</strong> – secondary command specification (optional).</p></li>
+<li><p><strong>ARGS</strong> – the list of arguments (e.g. list of individuals to add).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns a list of queried objects.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>armorontology_res</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="marker-server">
+<h1>Marker Server<a class="headerlink" href="#marker-server" title="Permalink to this heading">¶</a></h1>
+<p>Server node used to give the informations concering the environemnt. </p>
+<p><dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>Carmine Recchiuto </p>
+</dd>
+<dt><strong>Version</strong></dt><dd><p>0.1 </p>
+</dd>
+<dt><strong>Date</strong></dt><dd><p>2023-02-09</p>
+</dd>
+<dt><strong>Copyright</strong></dt><dd><p>Copyright (c) 2023 </p>
+</dd>
+</dl>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv414markerCallbackRN11assignment215RoomInformation7RequestERN11assignment215RoomInformation8ResponseE">
+<span id="_CPPv314markerCallbackRN11assignment215RoomInformation7RequestERN11assignment215RoomInformation8ResponseE"></span><span id="_CPPv214markerCallbackRN11assignment215RoomInformation7RequestERN11assignment215RoomInformation8ResponseE"></span><span id="markerCallback__assignment2::RoomInformation::RequestR.assignment2::RoomInformation::ResponseR"></span><span class="target" id="marker__server_8cpp_1acb386145eddd7e35588ea2b3a5ec6ca5"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">markerCallback</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">assignment2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">RoomInformation</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Request</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">req</span></span>, <span class="n"><span class="pre">assignment2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">RoomInformation</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Response</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">res</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414markerCallbackRN11assignment215RoomInformation7RequestERN11assignment215RoomInformation8ResponseE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Function that is called every time a request is done by the client node using the ‘/room_info’ message. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>req</strong> – contains the id of the room </p></li>
+<li><p><strong>res</strong> – contains the informations that will be given to the client node </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv44mainiPPc">
+<span id="_CPPv34mainiPPc"></span><span id="_CPPv24mainiPPc"></span><span id="main__i.cPP"></span><span class="target" id="marker__server_8cpp_1a3c04138a5bfe5d72780bb7e82a18e627"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">main</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">argv</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv44mainiPPc" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Main function. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>argc</strong> – </p></li>
+<li><p><strong>argv</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="aruco-detection">
+<h1>Aruco Detection<a class="headerlink" href="#aruco-detection" title="Permalink to this heading">¶</a></h1>
+<p>This is a client node that retrieves information from the ArUco markers located in the environment and sends them to the FSM (Finite State Machine) for further processing. </p>
+<p><p>Subscribes to:</p>
+<p>/robot/camera1/image_raw obtain images from camera</p>
+<dl class="simple">
+<dt><strong>Author</strong></dt><dd><p>Jabrail Chumakov (<a class="reference external" href="mailto:jabrail&#46;chumakov&#37;&#52;&#48;nu&#46;edu&#46;kz">jabrail<span>&#46;</span>chumakov<span>&#64;</span>nu<span>&#46;</span>edu<span>&#46;</span>kz</a>) </p>
+</dd>
+<dt><strong>Version</strong></dt><dd><p>0.1 </p>
+</dd>
+<dt><strong>Date</strong></dt><dd><p>2023-12-02</p>
+</dd>
+<dt><strong>Copyright</strong></dt><dd><p>Copyright (c) 2023</p>
+</dd>
+</dl>
+</p>
+<p><p>Services:</p>
+<p>/arm_info perform a request to the arm server /room_info perform a request to the marker server /world_init perform a request to the FSM</p>
+</p>
+<p>Description: This node is a client node responsible for sending request to the server nodes to: 1) Moving the robot’s arm to rotate and tilt the camera in order to capture images of all the aruco markers located in the initial room. 2) Retrieve information about the environment by accessing the aruco markers through the markers server. 3) Sends the retrieved information about the aruco markers to the Final State Machine node in order to construct the map for the robot. This node is closed after detecting all the markers and sending their information to the FSM node. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp">
+<span class="target" id="aruco__detection_8cpp_1a3c04138a5bfe5d72780bb7e82a18e627"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">main</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">argv</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Main function. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>argc</strong> – </p></li>
+<li><p><strong>argv</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv413ArucoDetector">
+<span id="_CPPv313ArucoDetector"></span><span id="_CPPv213ArucoDetector"></span><span id="ArucoDetector"></span><span class="target" id="class_aruco_detector"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ArucoDetector</span></span></span><a class="headerlink" href="#_CPPv413ArucoDetector" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This is a class that is used to capture aruco markers and retrieve and transmit their information. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector13ArucoDetectorEv">
+<span id="_CPPv3N13ArucoDetector13ArucoDetectorEv"></span><span id="_CPPv2N13ArucoDetector13ArucoDetectorEv"></span><span id="ArucoDetector::ArucoDetector"></span><span class="target" id="class_aruco_detector_1a7ca313b73d4ef6d209290f1629a437df"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ArucoDetector</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N13ArucoDetector13ArucoDetectorEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This is the method that creates an instance of the Aruco Detector class and sets up the necessary clients and subscribers. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector13imageCallbackERKN11sensor_msgs13ImageConstPtrE">
+<span id="_CPPv3N13ArucoDetector13imageCallbackERKN11sensor_msgs13ImageConstPtrE"></span><span id="_CPPv2N13ArucoDetector13imageCallbackERKN11sensor_msgs13ImageConstPtrE"></span><span id="ArucoDetector::imageCallback__sensor_msgs::ImageConstPtrCR"></span><span class="target" id="class_aruco_detector_1ad379822cd9e0412f7c8014a792fbafee"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">imageCallback</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">sensor_msgs</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ImageConstPtr</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">msg</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N13ArucoDetector13imageCallbackERKN11sensor_msgs13ImageConstPtrE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This function is executed whenever an image is published on the topic ‘/robot/camera1/image_raw’. </p>
+<p>
+This function gets the messages and process them to retrieve the IDs of the aruco markers contained in the field of view of the camera placed on the robot. Once the marker is detected, if it is the first time that has been seen, the ID is saved and sent to the aruco server to get the informations belonging to the specific marker. Once the informations have received, the same infos are sent to the final state machine to be update the ontology. If the ID was already detected, nothing is done. Once all the markers are detected, the node is shut down. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>msg</strong> – is the variable which contains the message which was published</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-private-members">Private Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector3nh_E">
+<span id="_CPPv3N13ArucoDetector3nh_E"></span><span id="_CPPv2N13ArucoDetector3nh_E"></span><span id="ArucoDetector::nh___ros::NodeHandle"></span><span class="target" id="class_aruco_detector_1a6f1a173985290ca88a343cfb723c75c0"></span><span class="n"><span class="pre">ros</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">NodeHandle</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">nh_</span></span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector3nh_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector9detector_E">
+<span id="_CPPv3N13ArucoDetector9detector_E"></span><span id="_CPPv2N13ArucoDetector9detector_E"></span><span id="ArucoDetector::detector___aruco::MarkerDetector"></span><span class="target" id="class_aruco_detector_1aab80dace94b91352758b4d57fd8cb4a0"></span><span class="n"><span class="pre">aruco</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">MarkerDetector</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">detector_</span></span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector9detector_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector11dictionary_E">
+<span id="_CPPv3N13ArucoDetector11dictionary_E"></span><span id="_CPPv2N13ArucoDetector11dictionary_E"></span><span id="ArucoDetector::dictionary___cv::Ptr:cv::aruco::Dictionary:"></span><span class="target" id="class_aruco_detector_1ac6fdc6f3f862a324c46eeef3b89b64a4"></span><span class="n"><span class="pre">cv</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Ptr</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">cv</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">aruco</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Dictionary</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">dictionary_</span></span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector11dictionary_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector15detectedMarkersE">
+<span id="_CPPv3N13ArucoDetector15detectedMarkersE"></span><span id="_CPPv2N13ArucoDetector15detectedMarkersE"></span><span id="ArucoDetector::detectedMarkers__std::vector:aruco::Marker:"></span><span class="target" id="class_aruco_detector_1a18609787e697b9142efb427f3cdea1f0"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">aruco</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Marker</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">detectedMarkers</span></span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector15detectedMarkersE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector9markerIDsE">
+<span id="_CPPv3N13ArucoDetector9markerIDsE"></span><span id="_CPPv2N13ArucoDetector9markerIDsE"></span><span id="ArucoDetector::markerIDs__std::vector:i:"></span><span class="target" id="class_aruco_detector_1a5b91d3a20f133cca78300facb28158c2"></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">int</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">markerIDs</span></span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector9markerIDsE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector8CamParamE">
+<span id="_CPPv3N13ArucoDetector8CamParamE"></span><span id="_CPPv2N13ArucoDetector8CamParamE"></span><span id="ArucoDetector::CamParam__aruco::CameraParameters"></span><span class="target" id="class_aruco_detector_1a40f0fe8a0da2db9cc0eb8351965c696f"></span><span class="n"><span class="pre">aruco</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">CameraParameters</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CamParam</span></span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector8CamParamE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector11MARKER_SIZEE">
+<span id="_CPPv3N13ArucoDetector11MARKER_SIZEE"></span><span id="_CPPv2N13ArucoDetector11MARKER_SIZEE"></span><span id="ArucoDetector::MARKER_SIZE__doubleC"></span><span class="target" id="class_aruco_detector_1adfd2e0b851812019f883b113af5bddc6"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">MARKER_SIZE</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0.05</span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector11MARKER_SIZEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector10MARKER_NUME">
+<span id="_CPPv3N13ArucoDetector10MARKER_NUME"></span><span id="_CPPv2N13ArucoDetector10MARKER_NUME"></span><span id="ArucoDetector::MARKER_NUM__iC"></span><span class="target" id="class_aruco_detector_1aed7835b87079e90aacdeee54e98f14c3"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">MARKER_NUM</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">7</span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector10MARKER_NUME" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector11marker_cli_E">
+<span id="_CPPv3N13ArucoDetector11marker_cli_E"></span><span id="_CPPv2N13ArucoDetector11marker_cli_E"></span><span id="ArucoDetector::marker_cli___ros::ServiceClient"></span><span class="target" id="class_aruco_detector_1a7f4424d680940cd899ba754e28698a8d"></span><span class="n"><span class="pre">ros</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ServiceClient</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">marker_cli_</span></span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector11marker_cli_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector9room_srv_E">
+<span id="_CPPv3N13ArucoDetector9room_srv_E"></span><span id="_CPPv2N13ArucoDetector9room_srv_E"></span><span id="ArucoDetector::room_srv___assignment2::RoomInformation"></span><span class="target" id="class_aruco_detector_1a356b842aeb4a55bf6ce7738f107e7678"></span><span class="n"><span class="pre">assignment2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">RoomInformation</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">room_srv_</span></span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector9room_srv_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector11camera_cli_E">
+<span id="_CPPv3N13ArucoDetector11camera_cli_E"></span><span id="_CPPv2N13ArucoDetector11camera_cli_E"></span><span id="ArucoDetector::camera_cli___ros::ServiceClient"></span><span class="target" id="class_aruco_detector_1a68d6bd819fca0ae21ff94ffa70b1c3c9"></span><span class="n"><span class="pre">ros</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ServiceClient</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">camera_cli_</span></span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector11camera_cli_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector8arm_srv_E">
+<span id="_CPPv3N13ArucoDetector8arm_srv_E"></span><span id="_CPPv2N13ArucoDetector8arm_srv_E"></span><span id="ArucoDetector::arm_srv___assignment2::ArmInfo"></span><span class="target" id="class_aruco_detector_1acc5e7b1fda6cb89ac6e0ac14dd1f09f5"></span><span class="n"><span class="pre">assignment2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ArmInfo</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">arm_srv_</span></span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector8arm_srv_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector10world_cli_E">
+<span id="_CPPv3N13ArucoDetector10world_cli_E"></span><span id="_CPPv2N13ArucoDetector10world_cli_E"></span><span id="ArucoDetector::world_cli___ros::ServiceClient"></span><span class="target" id="class_aruco_detector_1a804c16e1676b5f1ca67a9b7c7797a468"></span><span class="n"><span class="pre">ros</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ServiceClient</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">world_cli_</span></span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector10world_cli_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector10world_srv_E">
+<span id="_CPPv3N13ArucoDetector10world_srv_E"></span><span id="_CPPv2N13ArucoDetector10world_srv_E"></span><span id="ArucoDetector::world_srv___assignment2::WorldInit"></span><span class="target" id="class_aruco_detector_1ad7a48dfc631d8fe1e165ab3d05f64cd7"></span><span class="n"><span class="pre">assignment2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">WorldInit</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">world_srv_</span></span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector10world_srv_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector4connE">
+<span id="_CPPv3N13ArucoDetector4connE"></span><span id="_CPPv2N13ArucoDetector4connE"></span><span id="ArucoDetector::conn__assignment2::RoomConnection"></span><span class="target" id="class_aruco_detector_1a650051eb0ec8f16e4a1ff26a5dafd95e"></span><span class="n"><span class="pre">assignment2</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">RoomConnection</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">conn</span></span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector4connE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector3it_E">
+<span id="_CPPv3N13ArucoDetector3it_E"></span><span id="_CPPv2N13ArucoDetector3it_E"></span><span id="ArucoDetector::it___image_transport::ImageTransport"></span><span class="target" id="class_aruco_detector_1aa7b3f7619cd0510399e8a302e43d4af1"></span><span class="n"><span class="pre">image_transport</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">ImageTransport</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">it_</span></span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector3it_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector8img_sub_E">
+<span id="_CPPv3N13ArucoDetector8img_sub_E"></span><span id="_CPPv2N13ArucoDetector8img_sub_E"></span><span id="ArucoDetector::img_sub___image_transport::Subscriber"></span><span class="target" id="class_aruco_detector_1a98a21bc2d5d7653373b00d18e939fbc8"></span><span class="n"><span class="pre">image_transport</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Subscriber</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">img_sub_</span></span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector8img_sub_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13ArucoDetector6image_E">
+<span id="_CPPv3N13ArucoDetector6image_E"></span><span id="_CPPv2N13ArucoDetector6image_E"></span><span id="ArucoDetector::image___cv::Mat"></span><span class="target" id="class_aruco_detector_1a256906324252513a9754a23a3c68af56"></span><span class="n"><span class="pre">cv</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Mat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">image_</span></span></span><a class="headerlink" href="#_CPPv4N13ArucoDetector6image_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">assignment2</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Jabrail Chumakov.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
