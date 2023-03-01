@@ -117,7 +117,7 @@ The temporal diagram illustrates the sequence of events that occur in a robotic 
 
 ## <img src="https://user-images.githubusercontent.com/67557966/206817629-1e16e808-8c7f-4814-b2d1-e462ca7293b0.png" width="5%" height="5%"> Video demonstration
 
-[<img src="https://user-images.githubusercontent.com/67557966/206757072-fc9b14c4-52ad-4594-9308-0a2355f47035.png" width="70%">](https://youtu.be/oVrAHOfNHNc)
+[<img src="https://user-images.githubusercontent.com/67557966/206757072-fc9b14c4-52ad-4594-9308-0a2355f47035.png" width="70%">](https://www.youtube.com/watch?v=_LHYHsRIdUc&ab_channel=JabrailChumakov)
 
 ## <img src="https://user-images.githubusercontent.com/67557966/206817931-2a30ae94-d10d-43d4-8492-70423cd0d2be.png" width="5%" height="5%"> Working hypothesis
 
