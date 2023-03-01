@@ -108,7 +108,6 @@ The state machine consists of a total of seven states, which are as follows:
 - **Charge** is a state where the robot charges its battery after it has become low. This state is implemented using a blocking service that simulates the recharge action for a real battery. While in this state, time is wasted as the robot charges its battery until the timer expires, at which point the battery becomes fully charged. The purpose of the **Charge** state is to ensure that the robot's battery is replenished so that it can continue to operate effectively.
 
 ### Temporal diagram
-
 <p align="center">
   <img width="1000" height="450" src="https://user-images.githubusercontent.com/67557966/222238095-d1361e02-0c2f-4664-bd96-3f5c183ba930.png">
 </p>
